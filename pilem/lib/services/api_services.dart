@@ -3,8 +3,8 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class ApiServices {
-  static const String baseUrl = 'https://api.themoviedb.org/3';
-  static const String apiKey = '8b6169c2e3df18eac2a12de5d12c6315';
+  static const String baseUrl = "https://api.themoviedb.org/3";
+  static const String apiKey = "8b6169c2e3df18eac2a12de5d12c6315";
 
   // 1. Mengambil daftar film yang tayang saat ini
   Future<List<Map<String, dynamic>>> getAllMovies() async {

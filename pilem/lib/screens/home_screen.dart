@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pilem/services/api_services.dart';
 import 'package:pilem/models/movie.dart';
+import 'package:pilem/widget/movie_list.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -39,56 +40,19 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Film'),
+        backgroundColor: Colors.deepPurpleAccent,
       ),
 
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildMovieList("All Movies", _allMovies),
-            _buildMovieList("Trending Movies", _trendingMovie),
-            _buildMovieList("Popular Movies", _popularMovie),
+            MovieList(title: "All Movies", movies: _allMovies),
+            MovieList(title: "Trending Movies", movies: _trendingMovie),
+            MovieList(title: "Popular Movies", movies: _popularMovie),
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildMovieList(String title, List<Movie> movies) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: EdgeInsets.all(8.0),
-          child: Text(
-            title,
-            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-          ),
-        ),
-        SizedBox(
-          height: 200,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            itemCount: movies.length,
-            itemBuilder: (BuildContext context, int index) {
-              final Movie movie = movies[index];
-              return Padding(
-                padding: EdgeInsets.all(8.0),
-                child: Column(
-                  children: [
-                    Image.network("https://image.tmdb.org/t/p/w500${movie.posterPath}",
-                    width: 100, height: 150, fit: BoxFit.cover
-                    ),
-
-                    SizedBox(height: 5),
-                    Text(movie.title, style: TextStyle(fontSize: 14), overflow: TextOverflow.ellipsis)
-                  ],
-                )
-              );
-            },
-          ),
-        )
-      ],
     );
   }
 }

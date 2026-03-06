@@ -25,9 +25,7 @@ class Movie {
       posterPath: json['poster_path'] ?? '',
       backdropPath: json['backdrop_path'] ?? '',
       releaseDate: json['release_date'] ?? '',
-      voteAverage: (json['vote_average'].todouble() ?? 0.0),
+      voteAverage: json['vote_average'].toDouble() ?? 0.0,
     );
   }
-
-  String get fullPosterUrl =>"https://image.tmdb.org/t/p/w500$posterPath";
 }

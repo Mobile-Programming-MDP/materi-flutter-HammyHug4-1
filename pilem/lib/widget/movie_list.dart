@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pilem/models/movie.dart';
+import 'package:pilem/screens/detail_screen.dart';
 
 class MovieList extends StatelessWidget {
   final String title;
@@ -31,18 +32,34 @@ class MovieList extends StatelessWidget {
             itemCount: movies.length,
             itemBuilder: (BuildContext context, int index) {
               final Movie movie = movies[index];
-              return Padding(
-                padding: EdgeInsets.all(8.0),
-                child: Column(
-                  children: [
-                    Image.network('https://image.tmdb.org/t/p/w500${movie.posterPath}',
-                    width: 100, height: 150, fit: BoxFit.cover
+              return GestureDetector(
+                onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => DetailScreen(movie: movie),
                     ),
-
-                    SizedBox(height: 5),
-                    Text(movie.title, style: TextStyle(fontSize: 14), overflow: TextOverflow.ellipsis)
-                  ],
-                )
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Column(
+                      children: [
+                        Image.network(
+                          "https://image.tmdb.org/t/p/w500${movie.posterPath}",
+                          width: 100,
+                          height: 150,
+                          fit: BoxFit.cover,
+                        ),
+                        Text(
+                          movie.title.length > 14
+                              ? '${movie.title.substring(0, 10)}...'
+                              : movie.title,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
               );
             },
           ),

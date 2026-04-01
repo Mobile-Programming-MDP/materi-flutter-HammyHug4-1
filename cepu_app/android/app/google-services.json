@@ -1,0 +1,68 @@
+{
+  "project_info": {
+    "project_number": "263195764183",
+    "firebase_url": "https://first-app-ec476-default-rtdb.firebaseio.com",
+    "project_id": "first-app-ec476",
+    "storage_bucket": "first-app-ec476.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:263195764183:android:f3efb841edc1ba39381792",
+        "android_client_info": {
+          "package_name": "com.example.cepu_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC3osuQtxyEkfkPZEV6C6zoYkcae09Zdl0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:263195764183:android:37b006c7cd563e30381792",
+        "android_client_info": {
+          "package_name": "com.example.daftar_belanja"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC3osuQtxyEkfkPZEV6C6zoYkcae09Zdl0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:263195764183:android:712d4944d7e8b4c7381792",
+        "android_client_info": {
+          "package_name": "com.example.pilem"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC3osuQtxyEkfkPZEV6C6zoYkcae09Zdl0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -25,8 +25,7 @@ class SignInScreenState extends State<SignInScreen> {
         child: SingleChildScrollView(
           child: Column(
             children: [
-              const SizedBox(height: 20),
-
+              const SizedBox(height: 32.0),
               TextField(
                 controller: _emailController,
                 decoration: const InputDecoration(
@@ -34,9 +33,7 @@ class SignInScreenState extends State<SignInScreen> {
                   border: OutlineInputBorder(),
                 ),
               ),
-
-              const SizedBox(height: 10),
-
+              const SizedBox(height: 16.0),
               TextField(
                 controller: _passwordController,
                 decoration: const InputDecoration(
@@ -45,18 +42,14 @@ class SignInScreenState extends State<SignInScreen> {
                 ),
                 obscureText: true,
               ),
-
-              const SizedBox(height: 20),
-
+              const SizedBox(height: 16.0),
               ElevatedButton(
                 onPressed: () async {
                   try {
-                    await FirebaseAuth.instance
-                        .signInWithEmailAndPassword(
+                    await FirebaseAuth.instance.signInWithEmailAndPassword(
                       email: _emailController.text,
                       password: _passwordController.text,
                     );
-
                     Navigator.of(context).pushReplacement(
                       MaterialPageRoute(
                         builder: (context) => const HomeScreen(),
@@ -66,19 +59,14 @@ class SignInScreenState extends State<SignInScreen> {
                     setState(() {
                       _errorMessage = error.toString();
                     });
-
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(_errorMessage),
-                      ),
-                    );
+                    ScaffoldMessenger.of(
+                      context,
+                    ).showSnackBar(SnackBar(content: Text(_errorMessage)));
                   }
                 },
                 child: const Text('Sign In'),
               ),
-
-              const SizedBox(height: 10),
-
+              const SizedBox(height: 32.0),
               TextButton(
                 onPressed: () {
                   Navigator.push(
@@ -88,7 +76,7 @@ class SignInScreenState extends State<SignInScreen> {
                     ),
                   );
                 },
-                child: const Text("Don't have an account? Sign up"),
+                child: const Text('Don\'t have an account? Sign up'),
               ),
             ],
           ),

@@ -19,6 +19,11 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  String generateAvatarUrl(String? fullName) {
+    final formattedName = fullName?.trim().replaceAll(' ', '+');
+    return 'https://ui-avatars.com/api/?name=$formattedName&background=random&size=128';
+  }
+
   String? _idToken ="";
   String? _uid ="";
   String? _email ="";
@@ -60,6 +65,21 @@ class _HomeScreenState extends State<HomeScreen> {
       body: Center(
         child: Column(
           children: [
+            Image.network(
+              generateAvatarUrl(
+                FirebaseAuth.instance.currentUser?.displayName
+              ),
+              width: 128,
+              height: 128,
+            ),
+            SizedBox(height: 8.0,),
+            Text(
+              FirebaseAuth.instance.currentUser!.displayName!,
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
             Text("You have been singed in with token id : ${_idToken}"),
             Text("Current User : ${_uid}"),
             Text("Current Email : ${_email}"),

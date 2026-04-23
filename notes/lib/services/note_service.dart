@@ -16,7 +16,7 @@ class NoteService {
     Map<String, dynamic> newNote = {
       'title': note.title,
       'description': note.description,
-      'image_base64': note.imageBase64,
+      'image_base_64': note.imageBase64,
       'created_at': FieldValue.serverTimestamp(),
       'updated_at': FieldValue.serverTimestamp(),
       'latitude': note.latitude,
@@ -36,15 +36,15 @@ class NoteService {
           id: doc.id,
           title: data['title'],
           description: data['description'],
-          imageBase64: data['image_base64'],
+          imageBase64: data['image_base_64'],
           createdAt: data['created_at'] != null
               ? data['created_at'] as Timestamp
               : null,
           updatedAt: data['updated_at'] != null
               ? data['updated_at'] as Timestamp
               : null,
-          latitude: data['latitude'] as double?,
-          longitude: data['longitude'] as double?,
+          latitude: data['latitude'] as String?,
+          longitude: data['longitude'] as String?,
         );
       }).toList();
     });
@@ -55,7 +55,7 @@ class NoteService {
     Map<String, dynamic> updatedNote = {
       'title': note.title,
       'description': note.description,
-      'image_base64': note.imageBase64,
+      'image_base_64': note.imageBase64,
       'created_at': note.createdAt,
       'updated_at': FieldValue.serverTimestamp(),
       'latitude': note.latitude,

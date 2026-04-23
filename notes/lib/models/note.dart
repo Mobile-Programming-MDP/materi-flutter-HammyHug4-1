@@ -8,8 +8,8 @@ class Note {
   String? imageUrl;
   Timestamp? createdAt;
   Timestamp? updatedAt;
-  double? latitude;
-  double? longitude;
+  String? latitude;
+  String? longitude;
 
   Note({
     this.id,

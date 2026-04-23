@@ -5,7 +5,8 @@ import 'package:notes/models/note.dart';
 import 'package:notes/services/note_service.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:latlong2/latlong.dart';
+//import 'package:latlong2/latlong.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class NoteDialog extends StatefulWidget {
   final Note? note;
@@ -19,10 +20,10 @@ class NoteDialog extends StatefulWidget {
 class _NoteDialogState extends State<NoteDialog> {
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
-  File? _imageFile;
+  //File? _imageFile;
   String? _base64Image;
-  double? _latitude;
-  double? _longitude;
+  String? _latitude;
+  String? _longitude;
 
   @override
   void initState() {
@@ -37,17 +38,20 @@ class _NoteDialogState extends State<NoteDialog> {
   }
 
   Future<void> _pickImage() async {
-    final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
+    final pickedFile = await ImagePicker().pickImage(
+      source: ImageSource.gallery,
+    );
+
     if (pickedFile != null) {
       final bytes = await pickedFile.readAsBytes();
-      String base64Image = base64Encode(bytes);
+      String base64String = base64Encode(bytes);
       setState(() {
-        _base64Image = base64Image;
-        _imageFile = File(pickedFile.path);
+        _base64Image = base64String;
+        //_imageFile = File(pickedFile.path);
       });
-      print('Base64 String: $base64Image');
-    }else {
-      print('No image selected.');
+      print("Base64 String: $base64String");
+    } else {
+      print("No image selected.");
     }
   }
 
@@ -56,7 +60,7 @@ class _NoteDialogState extends State<NoteDialog> {
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Location services are disabled. Please enable them.')),
+          SnackBar(content: Text('Location services are disabled. Please enable them.')),
         );
         return;
       }
@@ -64,7 +68,7 @@ class _NoteDialogState extends State<NoteDialog> {
       LocationPermission permission = await Geolocator.checkPermission();
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
-        if (permission == LocationPermission.denied) {
+        if (permission == LocationPermission.deniedForever||permission == LocationPermission.denied) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Location permissions are denied. Please grant permission.')),
           );
@@ -75,8 +79,8 @@ class _NoteDialogState extends State<NoteDialog> {
       final position = await Geolocator.getCurrentPosition(locationSettings: const LocationSettings(accuracy: LocationAccuracy.high)).timeout(const Duration(seconds: 10));
 
       setState(() {
-        _latitude = position.latitude;
-        _longitude = position.longitude;
+        _latitude = position.latitude.toString();
+        _longitude = position.longitude.toString();
       });
     }catch (e) {
       debugPrint('Filed to retrive location: $e');
@@ -87,6 +91,20 @@ class _NoteDialogState extends State<NoteDialog> {
         _latitude = null;
         _longitude = null;
       });
+    }
+
+  }
+
+  Future<void> openMap() async {
+    final uri = Uri.parse(
+      'https://www.google.com/maps/search/?api=1&query=${_latitude},${_longitude}',
+    );
+    final success = await launchUrl(uri, mode: LaunchMode.externalApplication);
+    if (!mounted) return;
+    if (!success) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Gagal membuka peta.")),
+      );
     }
   }
   
@@ -113,29 +131,42 @@ class _NoteDialogState extends State<NoteDialog> {
               textAlign: TextAlign.start,
             ),
           ),
-          TextField(
-            controller: _descriptionController,
-            maxLines: null,
-          ),
-          
+          TextField(controller: _descriptionController),
           const Padding(
             padding: EdgeInsets.only(top: 20),
             child: Text('Image: '),
           ),
           Expanded(
-            child: _imageFile != null
-                ? Image.file(_imageFile!, fit: BoxFit.cover)
-                : (widget.note?.imageUrl != null &&
-                        Uri.parse(widget.note!.imageUrl!).isAbsolute
-                    ? Image.network(widget.note!.imageUrl!, fit: BoxFit.cover)
-                    : Container()),
+            child: _base64Image != null
+                ? Image.memory(
+                    base64Decode(_base64Image!),
+                    width: 250,
+                    height: 250,
+                    fit: BoxFit.cover,
+                  )
+                : Center(
+                    child: Icon(
+                      Icons.add_a_photo,
+                      size: 50,
+                      color: Colors.grey,
+                    ),
+                  ),
           ),
           TextButton(
             onPressed: _pickImage,
             child: const Text('Pick Image'),
           ),
-
-
+          TextButton(
+            onPressed: _getLocation,
+            child: const Text('Location'),
+          ),
+          if (_latitude != null && _longitude != null)
+            Text('Location: ($_latitude, $_longitude)'),
+          if (_latitude != null && _longitude != null)
+            TextButton(
+              onPressed: openMap,
+              child: const Text('Open in Maps'),
+            ),  
         ],
       ),
       actions: [
@@ -151,28 +182,32 @@ class _NoteDialogState extends State<NoteDialog> {
         ),
 
         ElevatedButton(
-          onPressed: () async {
-            String? imageUrl;
-            if (_imageFile != null) {
-              imageUrl = await NoteService.uploadImage(_imageFile!);
-            } else {
-              imageUrl = widget.note?.imageUrl;
-            }
-            
-            Note note = Note(
-              id: widget.note?.id,
-              title: _titleController.text,
-              description: _descriptionController.text,
-              imageUrl: imageUrl,
-              createdAt: widget.note?.createdAt,
-            );
-
+          onPressed: ()  {
             if (widget.note == null) {
-              NoteService.addNote(note)
-                  .whenComplete(() => Navigator.of(context).pop());
+              NoteService.addNote(
+                Note(
+                  title: _titleController.text,
+                  description: _descriptionController.text,
+                  imageBase64: _base64Image,
+                  latitude: _latitude,
+                  longitude: _longitude,
+                ),
+              ).whenComplete(() {
+                Navigator.of(context).pop();
+              });
             } else {
-              NoteService.updateNote(note)
-                  .whenComplete(() => Navigator.of(context).pop());
+              NoteService.updateNote(
+                Note(
+                  id: widget.note!.id,
+                  title: _titleController.text,
+                  description: _descriptionController.text,
+                  createdAt: widget.note!.createdAt,
+                  updatedAt: widget.note!.updatedAt,
+                  imageBase64: _base64Image,
+                  latitude: _latitude,
+                  longitude: _longitude,
+                ),
+              ).whenComplete(() => Navigator.of(context).pop());
             }
           },
           child: Text(widget.note == null ? 'Add' : 'Update'),

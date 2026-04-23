@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:notes/models/note.dart';
 import 'package:notes/services/note_service.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:latlong2/latlong.dart';
 
 class NoteDialog extends StatefulWidget {
   final Note? note;
@@ -19,6 +21,8 @@ class _NoteDialogState extends State<NoteDialog> {
   final TextEditingController _descriptionController = TextEditingController();
   File? _imageFile;
   String? _base64Image;
+  double? _latitude;
+  double? _longitude;
 
   @override
   void initState() {
@@ -27,6 +31,8 @@ class _NoteDialogState extends State<NoteDialog> {
       _titleController.text = widget.note!.title;
       _descriptionController.text = widget.note!.description;
       _base64Image = widget.note!.imageBase64;
+      _latitude = widget.note!.latitude;
+      _longitude = widget.note!.longitude;
     }
   }
 
@@ -42,6 +48,45 @@ class _NoteDialogState extends State<NoteDialog> {
       print('Base64 String: $base64Image');
     }else {
       print('No image selected.');
+    }
+  }
+
+  Future<void> _getLocation() async {
+    try {
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Location services are disabled. Please enable them.')),
+        );
+        return;
+      }
+
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Location permissions are denied. Please grant permission.')),
+          );
+          return;
+        }
+      }
+
+      final position = await Geolocator.getCurrentPosition(locationSettings: const LocationSettings(accuracy: LocationAccuracy.high)).timeout(const Duration(seconds: 10));
+
+      setState(() {
+        _latitude = position.latitude;
+        _longitude = position.longitude;
+      });
+    }catch (e) {
+      debugPrint('Filed to retrive location: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Failed to retrieve location. Please try again.')),
+      );
+      setState(() {
+        _latitude = null;
+        _longitude = null;
+      });
     }
   }
   

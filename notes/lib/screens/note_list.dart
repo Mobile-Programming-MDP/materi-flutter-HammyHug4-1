@@ -108,7 +108,14 @@ class NoteList extends StatelessWidget {
                                           NoteService.deleteNote(document);
                                           Navigator.of(context).pop();
                                         },
-                                      ), // TextButton
+                                      ),
+                                      TextButton(
+                                        child: const Text('Get Location'),
+                                        onPressed: () {
+                                          
+                                          // Call the function to get location
+                                        },
+                                      )
                                     ],
                                   ); // AlertDialog
                                 },

@@ -8,6 +8,8 @@ class Note {
   String? imageUrl;
   Timestamp? createdAt;
   Timestamp? updatedAt;
+  double? latitude;
+  double? longitude;
 
   Note({
     this.id,
@@ -17,6 +19,8 @@ class Note {
     this.imageUrl,
     this.createdAt,
     this.updatedAt,
+    this.latitude,
+    this.longitude,
   });
 
   factory Note.fromDocument(DocumentSnapshot doc) {

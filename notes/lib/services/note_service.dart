@@ -19,6 +19,8 @@ class NoteService {
       'image_base64': note.imageBase64,
       'created_at': FieldValue.serverTimestamp(),
       'updated_at': FieldValue.serverTimestamp(),
+      'latitude': note.latitude,
+      'longitude': note.longitude,
     };
 
     await _notesCollection.add(newNote);
@@ -41,6 +43,8 @@ class NoteService {
           updatedAt: data['updated_at'] != null
               ? data['updated_at'] as Timestamp
               : null,
+          latitude: data['latitude'] as double?,
+          longitude: data['longitude'] as double?,
         );
       }).toList();
     });
@@ -54,6 +58,8 @@ class NoteService {
       'image_base64': note.imageBase64,
       'created_at': note.createdAt,
       'updated_at': FieldValue.serverTimestamp(),
+      'latitude': note.latitude,
+      'longitude': note.longitude,
     };
 
     await _notesCollection.doc(note.id).update(updatedNote);
@@ -64,8 +70,12 @@ class NoteService {
     await _notesCollection.doc(note.id).delete();
   }
 
-  static Future<String?> uploadImage(File file) async {}
-
+  static Future<QuerySnapshot> retrieveNotes() {
+    return _notesCollection.get();
+  }
+  static Future<String?> uploadImage(File file) async {
+    return null;
+  }
   
 
 }

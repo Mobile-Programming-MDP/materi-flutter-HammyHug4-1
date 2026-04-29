@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cepu_app/screens/sign_in_screen.dart';
+import 'package:cepu_app/screens/add_post_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -10,11 +11,12 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  Future<void> _signOut(BuildContext context) async {
+  Future<void> _signOut() async {
     await FirebaseAuth.instance.signOut();
+    if (!mounted) return;
     Navigator.pushAndRemoveUntil(
       context,
-      MaterialPageRoute(builder: (context) => const SignInScreen()),
+      MaterialPageRoute(builder: (context) => SignInScreen()),
       (route) => false,
     );
   }
@@ -24,67 +26,70 @@ class _HomeScreenState extends State<HomeScreen> {
     return 'https://ui-avatars.com/api/?name=$formattedName&background=random&size=128';
   }
 
-  String? _idToken ="";
-  String? _uid ="";
-  String? _email ="";
+  // String? _idToken ="";
+  // String? _uid ="";
+  // String? _email ="";
 
   @override
   void initState() {
     super.initState();
-    getFirebaseAuthUser();
+    //getFirebaseAuthUser();
   }
   
-  Future<void> getFirebaseAuthUser() async {
-    User? user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      _uid = user.uid;
-      _email = user.email;
-      await user.getIdToken(true).then(
-        (v) => {
-          setState(() {
-            _idToken = v;
-          })
-        }
-      );
-    }
-  }
+  // Future<void> getFirebaseAuthUser() async {
+  //   User? user = FirebaseAuth.instance.currentUser;
+  //   if (user != null) {
+  //     _uid = user.uid;
+  //     _email = user.email;
+  //     await user.getIdToken(true).then(
+  //       (v) => {
+  //         setState(() {
+  //           _idToken = v;
+  //         })
+  //       }
+  //     );
+  //   }
+  // }
 
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Home Screen'),
-        backgroundColor: Colors.blueAccent,
+        title: const Text("Home Screen"),
         actions: [
           IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () => _signOut(context),
+            onPressed: () {
+              _signOut();
+            },
+            icon: Icon(Icons.logout),
+            tooltip: "Sign Out",
           ),
         ],
       ),
-      body: Center(
-        child: Column(
-          children: [
-            Image.network(
-              generateAvatarUrl(
-                FirebaseAuth.instance.currentUser?.displayName
-              ),
-              width: 128,
-              height: 128,
+      body: Column(
+        children: [
+          Image.network(
+            generateAvatarUrl(
+              FirebaseAuth.instance.currentUser?.displayName.toString(),
             ),
-            SizedBox(height: 8.0,),
-            Text(
-              FirebaseAuth.instance.currentUser!.displayName!,
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            Text("You have been singed in with token id : ${_idToken}"),
-            Text("Current User : ${_uid}"),
-            Text("Current Email : ${_email}"),
-          ],
-        )
+            width: 100,
+            height: 100,
+          ),
+          SizedBox(height: 8.0),
+          Text(
+            FirebaseAuth.instance.currentUser!.displayName!,
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+          SizedBox(height: 16.0),
+          const Center(child: Text("You Have Been Signed In!")),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(builder: (context) => const AddPostScreen()),
+          );
+        },
+        child: const Icon(Icons.add),
       ),
     );
   }

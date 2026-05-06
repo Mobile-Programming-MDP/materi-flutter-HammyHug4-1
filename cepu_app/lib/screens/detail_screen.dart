@@ -5,6 +5,7 @@ import 'package:cepu_app/services/post_services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:cepu_app/screens/map_detail_screen.dart';
 
 class DetailScreen extends StatelessWidget {
   final Post post;
@@ -122,6 +123,24 @@ class DetailScreen extends StatelessWidget {
                 ],
               ),
             ),
+            if (post.latitude != null && post.longitude != null)
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => MapDetailScreen(
+                          lat: double.tryParse(post.latitude.toString()) ?? 0,
+                          lng: double.tryParse(post.longitude.toString()) ?? 0,
+                        ),
+                      ),
+                    );
+                  },
+                  child: const Text('View on Map'),
+                ),
+              ),
           ],
         ),
       ),

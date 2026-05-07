@@ -1,42 +1,47 @@
+import 'package:cepu_app/models/post.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 
+//install depenencies flutter_map dan latlong2
 class MapDetailScreen extends StatelessWidget {
-  final double lat;
-  final double lng;
-
-  const MapDetailScreen({
-    super.key,
-    required this.lat,
-    required this.lng,
-  });
-
+  final Post post;
+  const MapDetailScreen({super.key, required this.post});
   @override
   Widget build(BuildContext context) {
+    final lat = double.tryParse(post.latitude ?? '');
+    final lng = double.tryParse(post.longitude ?? '');
+    final hasLocation = lat != null && lng != null;
+    final point = hasLocation ? LatLng(lat, lng) : const LatLng(0, 0);
     return Scaffold(
-      appBar: AppBar(title: Text("Detail Lokasi")),
-      body: FlutterMap(
-        options: MapOptions(
-          initialCenter: LatLng(lat, lng),
-          initialZoom: 15,
-        ),
-        children: [
-          TileLayer(
-            urlTemplate: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
-          ),
-          MarkerLayer(
-            markers: [
-              Marker(
-                width: 50,
-                height: 50,
-                point: LatLng(lat, lng),
-                child: Icon(Icons.location_on, color: Colors.red, size: 50),
-              ),
-            ],
-          ),
-        ],
-      ),
+      appBar: AppBar(title: Text(post.category ?? 'Map Detail')),
+      body: hasLocation
+          ? FlutterMap(
+              options: MapOptions(initialCenter: point, initialZoom: 15),
+              children: [
+                TileLayer(
+                  urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                  userAgentPackageName: 'com.example.cepu_app',
+                ),
+                MarkerLayer(
+                  markers: [
+                    Marker(
+                      point: point,
+                      width: 48,
+                      height: 48,
+                      child: const Icon(
+                        Icons.location_pin,
+                        color: Colors.red,
+                        size: 48,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            )
+          : const Center(
+              child: Text('No location data available for this post.'),
+            ),
     );
   }
 }

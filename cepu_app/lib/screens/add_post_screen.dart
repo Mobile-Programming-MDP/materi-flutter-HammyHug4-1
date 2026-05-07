@@ -6,6 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:http/http.dart' as http;
 
 class AddPostScreen extends StatefulWidget {
   const AddPostScreen({super.key});
@@ -22,6 +23,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
   String? _category;
   bool _isSubmitting = false;
   bool _isGettingLocation = false;
+  bool _isGenerating = false;
   List<String> get categories {
     return [
       'Jalan Rusak',
@@ -29,6 +31,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
       'Lawan Arah',
       'Merokok di Jalan',
       'Tidak Pakai Helm',
+      'Lainnya',
     ];
   }
 
@@ -40,6 +43,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
       final bytes = await image.readAsBytes();
       setState(() {
         _base64Image = base64Encode(bytes);
+        _generateDescriptionWithAI(); // Panggil fungsi AI setelah gambar dipilih
       });
     }
   }
@@ -219,6 +223,75 @@ class _AddPostScreenState extends State<AddPostScreen> {
     }
   }
 
+  //7. Fungsi generate description otomatis berdasarkan gambar
+  //Panggil fungsi ini setelah gambar dipilih
+  Future<void> _generateDescriptionWithAI() async {
+    if (_base64Image == null) return;
+    setState(() => _isGenerating = true);
+    try {
+      const apiKey = '';
+      const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=$apiKey';
+      final body = jsonEncode({
+        "contents": [
+          {
+            "parts": [
+              {
+                "inlineData": {"mimeType": "image/jpeg", "data": _base64Image},
+              },
+              {
+                "text":
+                    "Berdasarkan foto ini, identifikasi satu kategori utama kerusakan fasilitas umum "
+                    "dari daftar berikut: Jalan Rusak, Lampu Jalan Mati, Lawan Arah, Merokok di Jalan, Tidak Pakai Helm dan Lainnya. "
+                    "Pilih kategori yang paling dominan atau paling mendesak untuk dilaporkan. "
+                    "Buat deskripsi singkat untuk laporan perbaikan, dan tambahkan permohonan perbaikan. "
+                    "Fokus pada kerusakan yang terlihat dan hindari spekulasi.\n\n"
+                    "Format output yang diinginkan:\n"
+                    "Kategori: [satu kategori yang dipilih]\n"
+                    "Deskripsi: [deskripsi singkat]",
+              },
+            ],
+          },
+        ],
+      });
+      final headers = {'Content-Type': 'application/json'};
+      final response = await http.post(
+        Uri.parse(url),
+        headers: headers,
+        body: body,
+      );
+      if (response.statusCode == 200) {
+        final jsonResponse = jsonDecode(response.body);
+        final text =
+            jsonResponse['candidates'][0]['content']['parts'][0]['text'];
+        print("AI TEXT: $text");
+        if (text != null && text.isNotEmpty) {
+          final lines = text.trim().split('\n');
+          String? aicategory;
+          String? aidescription;
+          for (var line in lines) {
+            final lower = line.toLowerCase();
+            if (lower.startsWith('kategori:')) {
+              aicategory = line.substring(9).trim();
+            } else if (lower.startsWith('deskripsi:')) {
+              aidescription = line.substring(11).trim();
+            }
+          }
+          aidescription ??= text.trim();
+          setState(() {
+            _category = aicategory ?? 'Tidak diketahui';
+            _descriptionController.text = aidescription!;
+          });
+        }
+      } else {
+        debugPrint('Request failed: ${response.body}');
+      }
+    } catch (e) {
+      debugPrint('Failed to generate AI description: $e');
+    } finally {
+      if (mounted) setState(() => _isGenerating = false);
+    }
+  }
+
   @override
   void dispose() {
     _descriptionController.dispose();
@@ -236,10 +309,22 @@ class _AddPostScreenState extends State<AddPostScreen> {
           children: [
             _buildImagePreview(),
             const SizedBox(height: 12),
-            OutlinedButton(
-              onPressed: _isSubmitting ? null : pickImageAndConvert,
-              child: const Text('Pick Image'),
-            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                OutlinedButton(
+                  onPressed: _isGenerating ? null : pickImageAndConvert,
+                  child: Text(_isGenerating ? 'Generating...' : 'Select Image'),
+                ),
+                const SizedBox(width: 16),
+                if(!_isGenerating && _base64Image != null)
+                  OutlinedButton(
+                    onPressed: _isGenerating ? null : _generateDescriptionWithAI,
+                    child: Text('Generate Description'),
+                  )
+              ]
+             ),
+            
             const SizedBox(height: 16),
             OutlinedButton(
               onPressed: _isSubmitting ? null : _showCategorySelect,

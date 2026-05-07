@@ -70,9 +70,10 @@ class PostService {
     });
   }
 
-  static Stream<List<Post>> getPostListByCategory(String category) {
+  //1. Create function getPostListByCategory dgn parameter category
+  static Stream<List<Post>> getPostListByCategory(String? category) {
     Query query = _postsCollection;
-    if (category.isNotEmpty) {
+    if (category != null) {
       query = query.where('category', isEqualTo: category);
     }
     return query.snapshots().map((snapshot) {

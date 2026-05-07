@@ -123,24 +123,19 @@ class DetailScreen extends StatelessWidget {
                 ],
               ),
             ),
-            if (post.latitude != null && post.longitude != null)
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => MapDetailScreen(
-                          lat: double.tryParse(post.latitude.toString()) ?? 0,
-                          lng: double.tryParse(post.longitude.toString()) ?? 0,
+            const SizedBox(height: 12),
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => MapDetailScreen(post: post),
                         ),
-                      ),
-                    );
-                  },
-                  child: const Text('View on Map'),
-                ),
-              ),
+                      );
+                    },
+                    icon: const Icon(Icons.map),
+                    label: const Text('View on Map'),
+                  ),
           ],
         ),
       ),
